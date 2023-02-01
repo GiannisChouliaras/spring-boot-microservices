@@ -21,6 +21,11 @@ target/
 .springBeans
 .sts4-cache
 
+### Properties ###
+/inventory-service/src/main/resources/
+/order-service/src/main/resources/
+/product-service/src/main/resources/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
