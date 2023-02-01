@@ -22,9 +22,9 @@ target/
 .sts4-cache
 
 ### Properties ###
-/inventory-service/src/main/resources/
-/order-service/src/main/resources/
-/product-service/src/main/resources/
+/inventory-service/src/main/resources/application.properties
+/order-service/src/main/resources/application.properties
+/product-service/src/main/resources/application.properties
 
 ### NetBeans ###
 /nbproject/private/
