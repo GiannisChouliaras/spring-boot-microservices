@@ -1,6 +1,7 @@
 package com.vodafone.inventoryservice.service;
 
 import com.vodafone.inventoryservice.inventoryDTO.InventoryResponseDTO;
+import com.vodafone.inventoryservice.model.Inventory;
 import com.vodafone.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,18 +16,27 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
 
     /**
-     * TODO: Add Business logic to check if the desired amount of products exists in inventory.
      * Do not check only if its empty. Need to pass extra argument in the request (not only skuCodes).
      * @param skuCode (List of skuCodes in the Order)
-     * @return List of informations for each skuCode in stock
+     * @return List of information for each skuCode in stock
      */
     @Transactional(readOnly = true)
-    public List<InventoryResponseDTO> isInStock(List<String> skuCode) {
+    public List<InventoryResponseDTO> isInStock(List<String> skuCode, List<Integer> quantity) {
         return inventoryRepository.findBySkuCodeIn(skuCode).stream()
                 .map(inventory ->
                     InventoryResponseDTO.builder()
                             .skuCode(inventory.getSkuCode())
-                            .isInStock(inventory.getQuantity() > 0)
-                            .build()).toList();
+                            .quantity(inventory.getQuantity())
+                            .isInStock(checkQuantity(inventory, skuCode, quantity))
+                            .build())
+                .toList();
+    }
+
+    private Boolean checkQuantity(Inventory inventory, List<String> skuCode, List<Integer> quantity) {
+        // TODO: write better code.
+        for (int index = 0; index < skuCode.size(); index++)
+            if (inventory.getSkuCode().equals(skuCode.get(index)) && inventory.getQuantity() >= quantity.get(index))
+                return true;
+        return false;
     }
 }

@@ -40,29 +40,43 @@ public class OrderService {
     public void placeOrder(OrderRequest orderRequest) {
         Order order = constructOrder(orderRequest);
         List<String> skuCodes = getSkuCodesFromOrder(order);
-        InventoryResponseDTO[] response = getResponsesArrayFromInventory(skuCodes);
-        assert response != null && response.length == 0 : "response cannot be null or empty";
+        List<Integer> quantity = getQuantityFromOrder(order);
+        InventoryResponseDTO[] response = getResponsesArrayFromInventory(skuCodes, quantity);
+
         if (Boolean.TRUE.equals(productsDontMatch(response))) throw new IllegalArgumentException("Not in Stock.");
         orderRepository.save(order);
+    }
+
+    private List<Integer> getQuantityFromOrder(Order order) {
+        return order.getOrderLineItemsList().stream()
+                .map(OrderLineItems::getQuantity)
+                .toList();
     }
 
     private Boolean productsDontMatch(InventoryResponseDTO[] response) {
         return !Arrays.stream(response).allMatch(InventoryResponseDTO::isInStock);
     }
 
-    private static List<String> getSkuCodesFromOrder(Order order) {
+    private List<String> getSkuCodesFromOrder(Order order) {
         return order.getOrderLineItemsList().stream()
                 .map(OrderLineItems::getSkuCode)
                 .toList();
     }
 
-    private InventoryResponseDTO[] getResponsesArrayFromInventory(List<String> skuCodes) {
-        return webClient.get()
-                .uri(INVENTORY_GET_REQUEST,
-                        uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
-                .retrieve()
-                .bodyToMono(InventoryResponseDTO[].class)
-                .block();
+    private InventoryResponseDTO[] getResponsesArrayFromInventory(List<String> skuCodes, List<Integer> quantity) {
+        try {
+            return webClient.get()
+                    .uri(INVENTORY_GET_REQUEST,
+                            uriBuilder -> uriBuilder
+                                    .queryParam("skuCode", skuCodes)
+                                    .queryParam("quantity", quantity)
+                                    .build())
+                    .retrieve()
+                    .bodyToMono(InventoryResponseDTO[].class)
+                    .block();
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Response returned null");
+        }
     }
     private Order constructOrder(OrderRequest orderRequest) {
         Order order = new Order();
