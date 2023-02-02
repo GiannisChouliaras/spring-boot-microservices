@@ -1,5 +1,5 @@
 # spring-boot-microservices
 
 - [x] Create 3 Microservices (with database connection)
-- [ ] Services Communication (Sync and Async)
+- [x] Services (Order -> Inventory) Communication (Sync using WebClient)
 - [ ] Discovery Service
