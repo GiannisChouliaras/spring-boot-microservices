@@ -33,10 +33,17 @@ public class InventoryService {
     }
 
     private Boolean checkQuantity(Inventory inventory, List<String> skuCode, List<Integer> quantity) {
-        // TODO: write better code.
         for (int index = 0; index < skuCode.size(); index++)
-            if (inventory.getSkuCode().equals(skuCode.get(index)) && inventory.getQuantity() >= quantity.get(index))
+            if (productIsAvailable(inventory, skuCode, quantity, index))
                 return true;
         return false;
+    }
+
+    private static boolean productIsAvailable(
+            Inventory inventory,
+            List<String> skuCode,
+            List<Integer> quantity,
+            int index) {
+        return inventory.getSkuCode().equals(skuCode.get(index)) && inventory.getQuantity() >= quantity.get(index);
     }
 }
