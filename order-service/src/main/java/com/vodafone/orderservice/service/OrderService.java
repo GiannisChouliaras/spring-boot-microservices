@@ -21,9 +21,9 @@ import java.util.UUID;
 @Transactional
 public class OrderService {
 
-    private static final String INVENTORY_GET_REQUEST = "http://localhost:3002/api/inventory";
+    private static final String INVENTORY_GET_REQUEST = "http://inventory-service/api/inventory";
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
 
 
     /**
@@ -33,9 +33,6 @@ public class OrderService {
      *
      * [!!!!] Order could contain a bunch of products. So we do not call multiple requests per product,
      * we just pass a list
-     *
-     * @param orderRequest
-     *
      */
     public void placeOrder(OrderRequest orderRequest) {
         Order order = constructOrder(orderRequest);
@@ -65,7 +62,7 @@ public class OrderService {
 
     private InventoryResponseDTO[] getResponsesArrayFromInventory(List<String> skuCodes, List<Integer> quantity) {
         try {
-            return webClient.get()
+            return webClientBuilder.build().get()
                     .uri(INVENTORY_GET_REQUEST,
                             uriBuilder -> uriBuilder
                                     .queryParam("skuCode", skuCodes)
