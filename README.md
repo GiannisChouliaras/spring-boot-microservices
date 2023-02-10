@@ -4,4 +4,4 @@
 - [x] Services (Order -> Inventory) Communication (Sync using WebClient)
 - [x] Service Discovery Pattern (store all the information for services using Spring Cloud Netflix Eureka)
 - [x] API Gateway
-- [ ] Create a JSON file to read the fixed data for Inventory Table
+- [x] Create a JSON file to read the fixed data for Inventory Table
