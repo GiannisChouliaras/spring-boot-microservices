@@ -1,10 +1,17 @@
 package com.vodafone.inventoryservice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vodafone.inventoryservice.config.Config;
 import com.vodafone.inventoryservice.model.Inventory;
+import com.vodafone.inventoryservice.model.Product;
+import com.vodafone.inventoryservice.model.ProductsDTO;
 import com.vodafone.inventoryservice.repository.InventoryRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.io.File;
+import java.io.IOException;
+
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
@@ -17,21 +24,29 @@ public class InventoryServiceApplication {
 	@Bean
 	public CommandLineRunner loadData(InventoryRepository inventoryRepository) {
 		return args -> {
-			Inventory inventory = new Inventory();
-			inventory.setSkuCode("iphone_14");
-			inventory.setQuantity(50);
-
-			Inventory inventory1 = new Inventory();
-			inventory1.setSkuCode("iphone_13");
-			inventory1.setQuantity(0);
-
-			Inventory inventory2 = new Inventory();
-			inventory2.setSkuCode("iphone_12");
-			inventory2.setQuantity(100);
-
-			inventoryRepository.save(inventory);
-			inventoryRepository.save(inventory1);
-			inventoryRepository.save(inventory2);
+			ObjectMapper mapper = new ObjectMapper();
+			ProductsDTO products = getProductsFromJsonFile(mapper);
+			saveToInventory(inventoryRepository, products);
 		};
+	}
+
+	private void saveToInventory(InventoryRepository inventoryRepository, ProductsDTO products) {
+		products.products().stream()
+				.map(this::createNewInventory)
+				.forEach(inventoryRepository::save);
+	}
+
+	private Inventory createNewInventory(Product product) {
+		Inventory inventory = new Inventory();
+		inventory.setSkuCode(product.skuCode());
+		inventory.setQuantity(product.quantity());
+		return inventory;
+	}
+
+	private ProductsDTO getProductsFromJsonFile(ObjectMapper mapper) {
+		ProductsDTO products = null;
+		try {products = mapper.readValue(new File(Config.FILE), ProductsDTO.class);}
+		catch (IOException e) {e.printStackTrace();}
+		return products;
 	}
 }
